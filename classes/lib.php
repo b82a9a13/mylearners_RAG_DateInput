@@ -9,6 +9,7 @@ use dml_exception;
 use stdClass;
 
 class lib{
+
     //Function is used to get all courses the current user is enrolled as a coach for
     public function get_enrolled_courses(): array{
         global $DB;
@@ -30,6 +31,7 @@ class lib{
         });
         return $array;
     }
+
     //Function is used to get all the learners for a specific course id
     public function get_enrolled_learners($cid): array{
         global $DB;
@@ -50,6 +52,7 @@ class lib{
         });
         return $array;
     }
+    
     //Get course full name for a specific course id
     public function get_course_fullname($cid): string{
         global $DB;
