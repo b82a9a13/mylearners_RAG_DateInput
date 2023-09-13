@@ -24,7 +24,9 @@ class lib{
         ) eu ON c.id = eu.courseid AND ra.userid = eu.userid AND eu.userid = ?',[$USER->id]);
         $array = [];
         foreach($records as $record){
-            array_push($array, [$record->fullname, $record->courseid]);
+            if(!in_array([$record->fullname, $record->courseid], $array)){
+                array_push($array, [$record->fullname, $record->courseid]);
+            }
         }
         usort($array, function($a, $b){
             return strcmp($a[0], $b[0]);
