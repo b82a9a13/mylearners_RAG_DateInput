@@ -47,7 +47,11 @@ class lib{
         ) eu ON c.id = eu.courseid AND ra.userid = eu.userid AND eu.courseid = ?',[$cid]);
         $array = [];
         foreach($records as $record){
-            array_push($array, [$record->firstname.' '.$record->lastname, $record->userid, 'green', $this->get_total_incomplete($cid, $record->userid)]);
+            if(!$this->check_comp_dates_exists($cid, $record->userid)){
+                array_push($array, [$record->firstname.' '.$record->lastname, $record->userid, false, $this->get_total_incomplete($cid, $record->userid)]);
+            } else {
+                array_push($array, [$record->firstname.' '.$record->lastname, $record->userid, $this->get_comp_target_colour($cid, $record->userid), $this->get_total_incomplete($cid, $record->userid)]);
+            }
         }
         usort($array, function($a, $b){
             return strcmp($a[0], $b[0]);
@@ -70,5 +74,69 @@ class lib{
         [$cid, $uid])->total;
         $total = $DB->get_record_sql('SELECT count(*) as total FROM {course_modules} WHERE course = ? AND completion != 0',[$cid])->total;
         return ($total - $complete > 0) ? $total - $complete : 0;
+    }
+
+    //Check if a record for modules_comp_dates a specific user id and course id
+    private function check_comp_dates_exists($cid, $uid): bool{
+        global $DB;
+        return ($DB->record_exists('modules_comp_dates', [$DB->sql_compare_text('courseid') => $cid, $DB->sql_compare_text('userid') => $uid])) ? true : false;
+    }
+
+    //Create a record for modules_comp_dates a specific user id and course id
+    public function create_comp_dates($cid, $uid, $startdate, $enddate): bool{
+        global $DB;
+        if(!$this->check_comp_dates_exists($cid, $uid)){
+            if($DB->record_exists('user', [$DB->sql_compare_text('id') => $uid]) && $DB->record_exists('course', [$DB->sql_compare_text('id') => $cid])){
+                $record = new stdClass();
+                $record->courseid = $cid;
+                $record->userid = $uid;
+                $record->startdate = $startdate;
+                $record->enddate = $enddate;
+                if($DB->insert_record('modules_comp_dates', $record, true)){
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    //Get the target colour for a specific user id and course id. Red = 2 or more modules behind, orange = 1 module beind, green = no modules behind
+    private function get_comp_target_colour($cid, $uid): string{
+        global $DB;
+        $complete = $DB->get_record_sql('SELECT count(*) as total FROM {course_modules} c
+            INNER JOIN {course_modules_completion} cm ON cm.coursemoduleid = c.id
+            WHERE c.course = ? AND c.completion != 0 AND cm.userid = ? AND cm.completionstate = 1',
+        [$cid, $uid])->total;
+        $total = $DB->get_record_sql('SELECT count(*) as total FROM {course_modules} WHERE course = ? AND completion != 0',[$cid])->total;
+        if($total - $complete == 0){
+            return 'green';
+        } else {
+            $record = $DB->get_record_sql('SELECT startdate, enddate FROM {modules_comp_dates} WHERE courseid = ? AND userid = ?',[$cid, $uid]);
+            $time = ($record->enddate - $record->startdate) / $total;
+            $pos = $time * $complete;
+            $current = time() - $record->startdate;
+            if($pos >= $current){
+                return 'green';
+            } else {
+                $value = $current - $pos;
+                $divider = $time;
+                $divides = 0;
+                while($value >= $divider){
+                    $value = $value / $divider;
+                    $divides++;
+                }
+                if($divides === 1){
+                    return 'orange';
+                } else {
+                    return 'red';
+                }
+            }
+        }
+        return 'red';
     }
 }

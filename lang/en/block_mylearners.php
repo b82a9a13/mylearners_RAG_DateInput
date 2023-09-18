@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Strings for component 'block_iqa', language 'en'
- * @package   block_iqa
+ * Strings for component 'block_mylearners', language 'en'
+ * @package   block_mylearners
  * @author      Robert Tyrone Cullen
  */
 
