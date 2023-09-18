@@ -17,7 +17,7 @@ class block_mylearners extends block_base{
         $array = $lib->get_enrolled_courses();
         if($array != []){
             if(has_capability('block/mylearners:coach', context_course::instance($array[0][1]))){
-                $this->content->text = "<link rel='stylesheet' href='./../blocks/mylearners/classes/css/mylearners.css'><div class='text-center'>";
+                $this->content->text = "<link rel='stylesheet' href='./../blocks/mylearners/classes/css/mylearners.css'><h2 class='text-center'>".get_string('your_c', 'block_mylearners')."</h1><div class='text-center'>";
                 foreach($array as $data){
                     $this->content->text .= "<button class='btn btn-primary mr-1 mb-1' onclick='course_learners($data[1])'>$data[0]</button>";
                 }

@@ -47,7 +47,7 @@ class lib{
         ) eu ON c.id = eu.courseid AND ra.userid = eu.userid AND eu.courseid = ?',[$cid]);
         $array = [];
         foreach($records as $record){
-            array_push($array, [$record->firstname.' '.$record->lastname, $record->userid]);
+            array_push($array, [$record->firstname.' '.$record->lastname, $record->userid, 'green', $this->get_total_incomplete($cid, $record->userid)]);
         }
         usort($array, function($a, $b){
             return strcmp($a[0], $b[0]);
@@ -59,5 +59,16 @@ class lib{
     public function get_course_fullname($cid): string{
         global $DB;
         return $DB->get_record_sql('SELECT fullname FROM {course} WHERE id = ?',[$cid])->fullname;
+    }
+
+    //Get the total number of incomplete units for a sepcific user and course
+    private function get_total_incomplete($cid, $uid): int{
+        global $DB;
+        $complete = $DB->get_record_sql('SELECT count(*) as total FROM {course_modules} c
+            INNER JOIN {course_modules_completion} cm ON cm.coursemoduleid = c.id
+            WHERE c.course = ? AND c.completion != 0 AND cm.userid = ? AND cm.completionstate = 1',
+        [$cid, $uid])->total;
+        $total = $DB->get_record_sql('SELECT count(*) as total FROM {course_modules} WHERE course = ? AND completion != 0',[$cid])->total;
+        return ($total - $complete > 0) ? $total - $complete : 0;
     }
 }

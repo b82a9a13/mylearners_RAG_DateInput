@@ -31,9 +31,11 @@
 //R
 //S
 //T
+    $string['total_ou'] = 'Total outstanding units';
 //U
 //V
 //W
 //X
 //Y
+    $string['your_c'] = 'Your courses';
 //Z

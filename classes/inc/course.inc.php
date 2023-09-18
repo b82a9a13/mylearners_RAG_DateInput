@@ -21,6 +21,7 @@ if(!isset($_POST['id'])){
                     <tr>
                         <th>".get_string('learner', $p)."</th>
                         <th>".get_string('on_t', $p)."</th>
+                        <th>".get_string('total_ou', $p)."</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,7 +29,8 @@ if(!isset($_POST['id'])){
             foreach($array as $arr){
                 $returnText->return .= "<tr>
                     <td onclick='window.location.href=`./../user/view.php?id=$arr[1]&course=$id`' class='text-primary c-pointer'>$arr[0]</td>
-                    <td></td>
+                    <td style='background-color:".$arr[2].";'></td>
+                    <td>$arr[3]</td>
                 </tr>";
             }
             $returnText->return .= "</tbody></table></div>";
