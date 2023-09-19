@@ -5,7 +5,6 @@
  * @var stdClass $plugin
  */
 namespace block_mylearners;
-use dml_exception;
 use stdClass;
 
 class lib{
@@ -105,32 +104,27 @@ class lib{
         }
     }
 
-    //Get the target colour for a specific user id and course id. Red = 2 or more modules behind, orange = 1 module beind, green = no modules behind
-    private function get_comp_target_colour($cid, $uid): string{
+    //Get the target colour for a specific user id and course id. Red = 2 or more modules behind or passed end date, orange = 1 module beind, green = no modules behind
+    public function get_comp_target_colour($cid, $uid): string{
         global $DB;
         $complete = $DB->get_record_sql('SELECT count(*) as total FROM {course_modules} c
             INNER JOIN {course_modules_completion} cm ON cm.coursemoduleid = c.id
             WHERE c.course = ? AND c.completion != 0 AND cm.userid = ? AND cm.completionstate = 1',
         [$cid, $uid])->total;
         $total = $DB->get_record_sql('SELECT count(*) as total FROM {course_modules} WHERE course = ? AND completion != 0',[$cid])->total;
-        if($total - $complete == 0){
+        if($total - $complete === 0){
             return 'green';
         } else {
             $record = $DB->get_record_sql('SELECT startdate, enddate FROM {modules_comp_dates} WHERE courseid = ? AND userid = ?',[$cid, $uid]);
-            $time = ($record->enddate - $record->startdate) / $total;
-            $pos = $time * $complete;
+            $single = ($record->enddate - $record->startdate) / $total;
             $current = time() - $record->startdate;
-            if($pos >= $current){
+            if(($single * $complete) >= $current){
                 return 'green';
             } else {
-                $value = $current - $pos;
-                $divider = $time;
-                $divides = 0;
-                while($value >= $divider){
-                    $value = $value / $divider;
-                    $divides++;
-                }
-                if($divides === 1){
+                $number = floor($current / $single);
+                if($number <= $complete){
+                    return 'green';
+                } else if(($number - 1) <= $complete){
                     return 'orange';
                 } else {
                     return 'red';

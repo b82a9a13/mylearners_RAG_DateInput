@@ -21,7 +21,7 @@ class block_mylearners extends block_base{
                 foreach($array as $data){
                     $this->content->text .= "<button class='btn btn-primary mr-1 mb-1' onclick='course_learners($data[1])'>$data[0]</button>";
                 }
-                $this->content->text .= "</div><h2 class='text-danger text-center' id='mylearners_error' style='display:none;'></h2><div id='mylearners_div' style='display:none;'></div><script src='./../blocks/mylearners/amd/src/mylearners.js'></script>";
+                $this->content->text .= "</div><h2 class='text-danger text-center' id='mylearners_error' style='display:none;'></h2><div id='mylearners_div' style='display:none;'></div><script src='./../blocks/mylearners/amd/min/mylearners.min.js'></script>";
             }
         }
     }

@@ -14,7 +14,7 @@ if(!isset($_POST['id'])){
         $returnText->error = get_string('invalid_idp', $p);
     } else {
         if(!has_capability('block/mylearners:coach', context_course::instance($id))){
-            $returnText->error = "You aren't a coach for the course provided";
+            $returnText->error = get_string('you_aac', $p);
         } else {
             $array = $lib->get_enrolled_learners($id);
             if(count($array) == 0){
@@ -24,7 +24,24 @@ if(!isset($_POST['id'])){
                     <thead>
                         <tr>
                             <th>".get_string('learner', $p)."</th>
-                            <th>".get_string('on_t', $p)."</th>
+                            <th>".get_string('on_t', $p)."
+                                <img src='./../blocks/mylearners/classes/img/Help.png' class='help-img c-pointer' onclick='mylearners_help()'>
+                                <br>
+                                <span id='mylearners_help' style='display:none;'>
+                                    <span class='d-flex'>
+                                        <div class='help-img mb-1' style='background-color: red;'></div>
+                                        <span class='ml-1'>".get_string('on_t_red', $p)."</span>
+                                    </span>
+                                    <span class='d-flex'>
+                                        <div class='help-img mb-1' style='background-color: orange;'></div>
+                                        <span class='ml-1'>".get_string('on_t_orange', $p)."</span>
+                                    </span>
+                                    <span class='d-flex'>
+                                        <div class='help-img' style='background-color: green;'></div>
+                                        <span class='ml-1'>".get_string('on_t_green', $p)."</span>
+                                    </span>
+                                </span>
+                            </th>
                             <th>".get_string('total_ou', $p)."</th>
                         </tr>
                     </thead>
@@ -38,7 +55,7 @@ if(!isset($_POST['id'])){
                     ";
                     if($arr[2] === false){
                         $returnText->return .= "
-                        <td>
+                        <td id='on_target_$int'>
                             Input start and end date for all modules to be completed
                             <div>
                                 <span>Start Date:<input type='date' id='ml_startdate_$int'></span>
